@@ -3,6 +3,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+import re
 
 #METHODS
 def get_BMI():
@@ -21,7 +22,6 @@ def get_BMI():
 
     #Debugging
     try:
-        #Validation
         if name.get() == "":
             messagebox.showwarning('Empty blank', 'You may fill name blank with string.')
         elif len(name.get()) <2:
@@ -40,9 +40,9 @@ def get_BMI():
             messagebox.showwarning('Empty blank', 'You may fill height blank with float number.')
         else:
             pass
-            
         
-            
+    
+        
         #Comprobation
         if BMI < 18.5:
             status = 'Underweight'
