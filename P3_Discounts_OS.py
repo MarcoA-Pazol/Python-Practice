@@ -32,7 +32,7 @@ def create_database():
 #Get bill acount with applied or not applied discounts.
 def get_bill():
     pass
-    
+
     
     
     
