@@ -3,6 +3,8 @@ import sqlite3
 from tkinter import ttk
 import tkinter
 from tkinter import messagebox
+import numpy as np
+import pandas as pd
 
 
 """METHODS"""
@@ -46,13 +48,25 @@ def insert_data():
     cursor = conn.cursor()
     
     #Loading input data
-    Product = ('1L Milk Carton', 'Eggs Dozen', '1Kg Grappes', 'Cotagge Cheese 1Kg', '1Kg Suggar', '1L Oil', '1Kg Soap')
-    Price = (2.20, 3.85, 4.25, 3.99, 2.30, 2.49, 1.99)
-    Have_Discount = (1, 0, 1, 0, 0, 0, 1)
-    Discount = (0.10, 0.05, 0.25, 0.15, 0.07, 0.15, 0.20)
+    Product = np.array(['1L Milk Carton', 'Eggs Dozen', '1Kg Grappes', 'Cotagge Cheese 1Kg', '1Kg Suggar', '1L Oil', '1Kg Soap'])
+    Price = np.array([2.20, 3.85, 4.25, 3.99, 2.30, 2.49, 1.99])
+    Have_Discount = np.array([1, 0, 1, 0, 0, 0, 1])
+    Discount = np.array([0.10, 0.05, 0.25, 0.15, 0.07, 0.15, 0.20])
     
+    #Creating Data Frame
+    data_dict = {
+        'Product': Product,
+        'Price': Price,
+        'Have_Discount': Have_Discount,
+        'Discount': Discount
+    }
+    
+    data_frame = pd.DataFrame(data_dict)
+    
+    
+    """I HAVE TO FIX THE VALIDATION BLOCK, IN LINE 69"""
     #Get DB data
-    product_comprobation = cursor.execute('SELECT * FROM Products WHERE Product = ?', Product).fetchone()
+    product_comprobation = cursor.execute('SELECT * FROM Products WHERE Product = ?', Product[:]).fetchone()
     
     #Validation: Inserting data
     try:                    
@@ -60,7 +74,8 @@ def insert_data():
             messagebox.showwarning('Repeated value', 'It is not posible to insert repeated values, value that you provide is in table.')
         else:
             try:
-                cursor.execute('INSERT INTO Products(Product, Price, Have_Discount, Discount) VALUES(?, ?, ?, ?)', (Product, Price, Have_Discount, Discount))
+                for index, row in data_frame.iterrows():
+                    cursor.execute('INSERT INTO Products(Product, Price, Have_Discount, Discount) VALUES(?, ?, ?, ?)', (row['Product'], row['Price'], row['Have_Discount'], row['Discount']))
                 messagebox.showinfo('Insert data', 'Data has inserted succesfully')
             except Exception as e:
                 print(e)
