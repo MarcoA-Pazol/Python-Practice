@@ -2,10 +2,8 @@
 import sqlite3
 from tkinter import ttk
 from tkinter.ttk import Combobox
-import tkinter
+import tkinter as tk
 from tkinter import messagebox
-import numpy as np
-import pandas as pd
 
 """DATA SETS"""
 #DB Data
@@ -25,7 +23,7 @@ products_set = ['1 Milk Carton', 'Eggs Dozen', '1Kg Grappes', 'Cotagge Cheese 1K
 
 
 """METHODS"""
-#Create Database using Sqlite3
+#CREATE DB
 def create_database():
     """
     DOCSTRING:
@@ -37,7 +35,7 @@ def create_database():
     Returns:
         null
     """
-    conn = sqlite3.connect('Products')
+    conn = sqlite3.connect('Products_DB')
     cursor = conn.cursor()
     try:
         cursor.execute('CREATE TABLE IF NOT EXISTS Products(ID INTEGER PRIMARY KEY AUTOINCREMENT, Product TEXT, Price REAL, Have_Discount INTEGER, Discount REAL)')
@@ -45,15 +43,14 @@ def create_database():
         conn.commit()
         conn.close()
     except Exception as e:
-        print(e)
-        messagebox.showerror('Error', 'There was an error creating "Products" table')
+        messagebox.showerror('Error', e)
 
 
-#Insert data in Products table
+#INSERT DATA
 def insert_data():
     """
     DOCSTRING:
-        Insert data examples in DB to be used in the future.
+        Insert data examples in DB table to be used in the future.
     
     Attributes:
         none
@@ -62,7 +59,7 @@ def insert_data():
         null
     """
     #DB connection
-    conn = sqlite3.connect('Products')
+    conn = sqlite3.connect('Products_DB')
     cursor = conn.cursor()
     
     """I HAVE TO FIX THE VALIDATION AND COMPROBATION"""
@@ -71,7 +68,7 @@ def insert_data():
     
     #Validation: Inserting data
     try:                    
-        if product_comprobation is not None:
+        if product_comprobation is None:
            messagebox.showwarning('Repeated value', 'It is not posible to insert repeated values, value that you provide is in table.')
         else:
             try:
@@ -80,58 +77,92 @@ def insert_data():
             except Exception as e:
                 print(e)
     except Exception as e:
-        print(e)
-        messagebox.showerror('Error', 'There was an error inserting data, this is not the correct way to insert data dictionary on table, please tell this to support at adress@developing.dev')
+        messagebox.showerror('Error', e)
     conn.commit()
     conn.close()
     
     
+#SUBMMIT 
 def submmit():
-    pass
-
-
+    """
+        DOCSTRING:
+            Submmit data to be comprobed and return the values to be showed in GI visualization label.
         
-#Get bill acount with applied or not applied discounts.
-def get_bill():
-    pass
+        Attributes:
+            None
+            
+        Returns:
+            Null
+    """
+    #Select product from Combobox
+    list_selected_product = products_list.get()
+    #Connect to DB
+    conn = sqlite3.connect('Products_DB')   
+    cursor = conn.cursor()
+    #Fetchone / Validation
+    try:
+        product_data = cursor.execute('SELECT * FROM Products WHERE Product = ?', (list_selected_product,)).fetchone()
+        if product_data is not None:
+            if product_data[3] == 1:
+                price_discounted.set(product_data[2] - (product_data[2] * product_data[4]))
+                discount_percentage.set(product_data[4])
+            else:
+                price_discounted.set(product_data[2])
+                discount_percentage.set(value=0)
+                
+            #Getting results
+            normal_price.set(product_data[2]) 
+            product_selected.set(product_data[1])
+            print(f'Product: {product_selected.get()}\nPrice: {normal_price.get()}\nApplied discount price: {price_discounted.get()}\nDiscount: {discount_percentage.get()}')
+        else:
+            messagebox.showwarning('Product selected', 'Product selected is not in existance, please use another product or tell to support if it could suppose an error.')
+    except Exception as e:
+        messagebox.showerror('Error', e)
+
 
 
 """GRAPHIC INTERFACE"""
-root = tkinter.Tk()
+root = tk.Tk()
 root.title('Store Discounts')
 root.geometry('600x400+400+100')
 root.config(bg = 'SkyBlue')
 
 #Field variables
-product_cuantity = ttk.IntVar(value = 0)
-product_selected = ttk.StringVar(value = '')
-price_discounted = ttk.DoubleVar(value = 0)
-normal_price = ttk.DoubleVar(value = 0)
+product_cuantity = tk.IntVar(value = 0)
+product_selected = tk.StringVar(value = '')
+price_discounted = tk.DoubleVar(value = 0)
+normal_price = tk.DoubleVar(value = 0)
+discount_percentage = tk.DoubleVar(value = 0)
 
 #Frames
-base_frame = ttk.Frame(root, bg = 'Blue', width = 200, height = 200)
+base_frame = tk.Frame(root, bg = 'Blue', width = 250, height = 300)
 base_frame.place(x = 50, y = 10)
 
-principal_frame = ttk.Frame(root, bg = 'Snow', width = 190, height = 190)
+principal_frame = tk.Frame(root, bg = 'Snow', width = 240, height = 290)
 principal_frame.place(x = 55, y = 15)
 
 #Labels
-discounts_text = ttk.Label(principal_frame, bg = 'Snow', fg = 'Black', text = 'D I S C O U N T S', font = ('Times', '10', 'bold'))
-discounts_text.place(x = 50, y = 10)
+discounts_text = tk.Label(principal_frame, bg = 'Snow', fg = 'Black', text = 'D I S C O U N T S', font = ('Times', '12', 'bold'))
+discounts_text.place(x = 40, y = 10)
 
-select_product_label = ttk.Label(principal_frame, bg = 'Snow', fg = 'Black', text = 'Product: ', font = ('Times', '8', 'bold'))
-select_product_label.place(x = 10, y = 20)
+select_product_label = tk.Label(principal_frame, bg = 'Snow', fg = 'Black', text = 'Product: ', font = ('Times', '10', 'bold'))
+select_product_label.place(x = 10, y = 35)
+
+horizontal_line = tk.Label(principal_frame, bg = 'Blue', fg = 'Blue', width = 240, height = 1, font=('Courier', '1', 'bold'))
+horizontal_line.place(x = 0, y = 95)
 
 #Combobox
 products_list = ttk.Combobox(principal_frame, values = products_set)
-products_list.place(x = 50, y = 20)
+products_list.place(x = 65, y = 35)
 
 #Button
-submmit_button = ttk.Button(principal_frame, text = 'Submmit', command = lambda:submmit())
-submmit_button.place(x = 20, y = 50)
+submmit_button = tk.Button(principal_frame, text = 'Submmit', command = lambda:submmit())
+submmit_button.place(x = 20, y = 65)
 
 root.mainloop()
 
+#create_database()
+#insert_data()
     
     
     
