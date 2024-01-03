@@ -62,7 +62,6 @@ def insert_data():
     conn = sqlite3.connect('Products_DB')
     cursor = conn.cursor()
     
-    """I HAVE TO FIX THE VALIDATION AND COMPROBATION"""
     #Get DB Data
     product_comprobation = cursor.execute('SELECT * FROM Products').fetchall()
     
@@ -113,7 +112,7 @@ def submmit():
             #Getting results
             normal_price.set(product_data[2]) 
             product_selected.set(product_data[1])
-            print(f'Product: {product_selected.get()}\nPrice: {normal_price.get()}\nApplied discount price: {price_discounted.get()}\nDiscount: {discount_percentage.get()}')
+            result_label.config(text = (f'Product: {product_selected.get()}\nPrice: {normal_price.get()}\nApplied discount price: {"{:.2f}".format(price_discounted.get())}\nDiscount: {discount_percentage.get()}'))
         else:
             messagebox.showwarning('Product selected', 'Product selected is not in existance, please use another product or tell to support if it could suppose an error.')
     except Exception as e:
@@ -124,8 +123,9 @@ def submmit():
 """GRAPHIC INTERFACE"""
 root = tk.Tk()
 root.title('Store Discounts')
-root.geometry('600x400+400+100')
+root.geometry('290x320+400+100')
 root.config(bg = 'SkyBlue')
+root.resizable(0, 0)
 
 #Field variables
 product_cuantity = tk.IntVar(value = 0)
@@ -136,10 +136,10 @@ discount_percentage = tk.DoubleVar(value = 0)
 
 #Frames
 base_frame = tk.Frame(root, bg = 'Blue', width = 250, height = 300)
-base_frame.place(x = 50, y = 10)
+base_frame.place(x = 20, y = 10)
 
 principal_frame = tk.Frame(root, bg = 'Snow', width = 240, height = 290)
-principal_frame.place(x = 55, y = 15)
+principal_frame.place(x = 25, y = 15)
 
 #Labels
 discounts_text = tk.Label(principal_frame, bg = 'Snow', fg = 'Black', text = 'D I S C O U N T S', font = ('Times', '12', 'bold'))
@@ -158,6 +158,10 @@ products_list.place(x = 65, y = 35)
 #Button
 submmit_button = tk.Button(principal_frame, text = 'Submmit', command = lambda:submmit())
 submmit_button.place(x = 20, y = 65)
+
+#Result Label
+result_label = tk.Label(principal_frame, text = 'Empty', font = ('Courier', '8', 'bold'), bg = 'Snow', fg = 'Black', width = 35, height = 10)
+result_label.place(x = 0, y = 110)
 
 root.mainloop()
 
